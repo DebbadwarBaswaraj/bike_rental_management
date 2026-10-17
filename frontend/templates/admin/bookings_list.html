@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Manage All Customer Bookings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-muted">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Reservations Control</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-0">Customer Reservations & Status Control</h1>
+        </div>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-rounded">
+                <i class="bi bi-speedometer2 me-1"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <form method="GET" action="{{ url_for('admin.bookings_list') }}" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control bg-light border-start-0" placeholder="Search by customer name, email, or bike...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="" {% if not status_filter %}selected{% endif %}>All Booking Statuses</option>
+                    {% for status in valid_statuses %}
+                        <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ status|capitalize }} Only</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2 justify-content-md-end">
+                <button type="submit" class="btn btn-primary btn-rounded px-3">
+                    Filter
+                </button>
+                {% if status_filter or search_query %}
+                    <a href="{{ url_for('admin.bookings_list') }}" class="btn btn-outline-secondary btn-rounded" title="Reset">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Booking</th>
+                        <th>Customer</th>
+                        <th>Bicycle</th>
+                        <th>Schedule Window</th>
+                        <th>Duration / Total</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td class="ps-4">
+                            <span class="font-monospace fw-bold text-dark">#BK-{{ "%04d"|format(booking.id) }}</span>
+                            <small class="text-muted d-block">{{ booking.created_at.strftime('%b %d, %Y') }}</small>
+                        </td>
+                        <td>
+                            <strong class="text-dark d-block">{{ booking.user.name }}</strong>
+                            <small class="text-muted">{{ booking.user.email }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ booking.bike.name }}</div>
+                            <span class="badge badge-category-{{ booking.bike.category|lower }} px-2 py-0" style="font-size: 0.7rem;">
+                                {{ booking.bike.category }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div><i class="bi bi-box-arrow-right text-success me-1"></i> {{ booking.start_time.strftime('%b %d, %I:%M %p') }}</div>
+                                <div class="text-muted"><i class="bi bi-box-arrow-in-left text-danger me-1"></i> {{ booking.end_time.strftime('%b %d, %I:%M %p') }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success fs-6">${{ "%.2f"|format(booking.total_amount) }}</div>
+                            <small class="text-muted">{{ booking.duration_hours }} hrs</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-status-{{ booking.status }} px-3 py-2">
+                                {{ booking.status|capitalize }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <a href="{{ url_for('bookings.confirmation', booking_id=booking.id) }}" class="btn btn-sm btn-light btn-rounded border" title="Receipt">
+                                    <i class="bi bi-receipt"></i>
+                                </a>
+
+                                <!-- Status Transition Form -->
+                                <form method="POST" action="{{ url_for('admin.booking_status_update', booking_id=booking.id) }}" class="d-inline-flex align-items-center gap-1">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="status" class="form-select form-select-sm bg-light" style="width: 125px;">
+                                        {% for status in valid_statuses %}
+                                            <option value="{{ status }}" {% if booking.status == status %}selected{% endif %}>
+                                                {{ status|capitalize }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary btn-rounded" title="Save Status">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            No reservations found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

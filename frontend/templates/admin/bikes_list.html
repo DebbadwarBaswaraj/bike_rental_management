@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Fleet Inventory Management{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-muted">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Fleet Management</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-0">Bike Inventory & Fleet Control</h1>
+        </div>
+        <div>
+            <a href="{{ url_for('admin.bike_add') }}" class="btn btn-primary btn-rounded px-4">
+                <i class="bi bi-plus-lg me-1"></i> Add New Bike
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <form method="GET" action="{{ url_for('admin.bikes_list') }}" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <select name="category" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="" {% if not category_filter %}selected{% endif %}>All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select bg-light" onchange="this.form.submit()">
+                    <option value="" {% if not status_filter %}selected{% endif %}>All Availability Statuses</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active & Available Only</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive / Maintenance Only</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex justify-content-md-end">
+                {% if category_filter or status_filter %}
+                    <a href="{{ url_for('admin.bikes_list') }}" class="btn btn-outline-secondary btn-sm btn-rounded">
+                        <i class="bi bi-x-circle me-1"></i> Clear Filters
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Fleet Inventory Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Bike Details</th>
+                        <th>Category</th>
+                        <th>Hourly Rate</th>
+                        <th>Availability</th>
+                        <th>Created</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bike in bikes %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="{{ bike.image_url or url_for('static', filename='images/placeholder.svg') }}" 
+                                     alt="{{ bike.name }}" 
+                                     class="rounded-3" 
+                                     style="width: 52px; height: 52px; object-fit: cover;"
+                                     onerror="this.src='/static/images/placeholder.svg';">
+                                <div>
+                                    <div class="fw-bold text-dark">{{ bike.name }}</div>
+                                    <small class="text-muted">{{ bike.model }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-category-{{ bike.category|lower }} px-2 py-1">
+                                {{ bike.category }}
+                            </span>
+                        </td>
+                        <td class="fw-bold text-dark">
+                            ${{ "%.2f"|format(bike.price_per_hour) }} <small class="text-muted fw-normal">/hr</small>
+                        </td>
+                        <td>
+                            {% if bike.is_active %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check-circle me-1"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                    <i class="bi bi-slash-circle me-1"></i> Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">
+                            {{ bike.created_at.strftime('%b %d, %Y') }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-1">
+                                <!-- Edit Button -->
+                                <a href="{{ url_for('admin.bike_edit', bike_id=bike.id) }}" class="btn btn-sm btn-outline-primary btn-rounded" title="Edit Bike">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Toggle Active Status Form -->
+                                <form method="POST" action="{{ url_for('admin.bike_toggle_status', bike_id=bike.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning btn-rounded" title="{{ 'Deactivate' if bike.is_active else 'Activate' }}">
+                                        <i class="bi {{ 'bi-pause-circle' if bike.is_active else 'bi-play-circle' }}"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Safe Delete Button -->
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-rounded" data-bs-toggle="modal" data-bs-target="#deleteBikeModal{{ bike.id }}" title="Delete Bike">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteBikeModal{{ bike.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content rounded-4 border-0 shadow">
+                                            <div class="modal-header border-0 pb-0">
+                                                <h5 class="modal-title fw-bold text-danger">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Remove {{ bike.name }}?
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start py-3">
+                                                <p class="mb-2">Are you sure you want to remove this bike from inventory?</p>
+                                                <div class="p-3 bg-light rounded-3 text-muted small">
+                                                    <strong>Audit & Data Safety Note:</strong> If this bike has existing customer reservations, it will be safely marked <em>inactive</em> to preserve historical booking records and financial audits without breaking database integrity.
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-0 pt-0">
+                                                <button type="button" class="btn btn-light btn-rounded" data-bs-dismiss="modal">Cancel</button>
+                                                <form method="POST" action="{{ url_for('admin.bike_delete', bike_id=bike.id) }}" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="btn btn-danger btn-rounded px-3">
+                                                        Confirm Deletion
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            No bikes found in inventory matching your filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

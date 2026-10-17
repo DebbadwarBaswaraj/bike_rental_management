@@ -1,0 +1,219 @@
+:root {
+  --primary-color: #0f766e;
+  --primary-hover: #115e59;
+  --accent-color: #10b981;
+  --accent-light: #ecfdf5;
+  --dark-slate: #0f172a;
+  --light-bg: #f8fafc;
+  --card-border: #e2e8f0;
+  --text-muted: #64748b;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--light-bg);
+  color: #1e293b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #0f172a !important;
+}
+
+.brand-icon {
+  color: var(--accent-color);
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #475569 !important;
+  transition: color 0.15s ease-in-out;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary-color) !important;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  padding: 5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-badge {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  border-radius: 50rem;
+  display: inline-block;
+  margin-bottom: 1.25rem;
+}
+
+/* Bike Cards */
+.bike-card {
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background-color: #ffffff;
+}
+
+.bike-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.12), 0 6px 12px -4px rgba(15, 23, 42, 0.06);
+}
+
+.bike-image-wrapper {
+  position: relative;
+  height: 220px;
+  background-color: #e2e8f0;
+  overflow: hidden;
+}
+
+.bike-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.bike-card:hover .bike-img {
+  transform: scale(1.05);
+}
+
+.category-badge-floating {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.price-tag {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.price-period {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Category Badges */
+.badge-category-mountain { background-color: #dc2626; color: white; }
+.badge-category-road { background-color: #2563eb; color: white; }
+.badge-category-electric { background-color: #d97706; color: white; }
+.badge-category-city { background-color: #059669; color: white; }
+.badge-category-hybrid { background-color: #7c3aed; color: white; }
+
+/* Status Badges */
+.badge-status-confirmed { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.badge-status-completed { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+.badge-status-cancelled { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.badge-status-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+/* Dashboard Cards */
+.metric-card {
+  border-radius: 1rem;
+  border: 1px solid var(--card-border);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.metric-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* Live Quote Box */
+.quote-box {
+  background: #f0fdf4;
+  border: 1px dashed #86efac;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-accent {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.btn-accent:hover {
+  background-color: #059669;
+  border-color: #059669;
+  color: white;
+}
+
+.btn-rounded {
+  border-radius: 50rem;
+}
+
+/* Table */
+.custom-table th {
+  background-color: #f8fafc;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.custom-table td {
+  vertical-align: middle;
+}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill fw-semibold mb-1">
+                Admin Control Center
+            </span>
+            <h1 class="fw-bold mb-0">Operations Dashboard</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.bike_add') }}" class="btn btn-primary btn-rounded">
+                <i class="bi bi-plus-circle me-1"></i> Add New Bike
+            </a>
+            <a href="{{ url_for('admin.bikes_list') }}" class="btn btn-outline-secondary btn-rounded">
+                <i class="bi bi-bicycle me-1"></i> Manage Fleet
+            </a>
+            <a href="{{ url_for('admin.bookings_list') }}" class="btn btn-outline-secondary btn-rounded">
+                <i class="bi bi-receipt me-1"></i> All Bookings
+            </a>
+        </div>
+    </div>
+
+    <!-- Metric Cards Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Revenue Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted fw-semibold small text-uppercase">Total Revenue</span>
+                    <div class="metric-icon-box bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">${{ "%.2f"|format(total_revenue) }}</h2>
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i> Confirmed & completed rentals
+                </small>
+            </div>
+        </div>
+
+        <!-- Fleet Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted fw-semibold small text-uppercase">Active Fleet</span>
+                    <div class="metric-icon-box bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-bicycle"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">{{ active_bikes }} <span class="fs-5 text-muted fw-normal">/ {{ total_bikes }}</span></h2>
+                <small class="text-success fw-semibold">
+                    <i class="bi bi-check2-circle me-1"></i> {{ (active_bikes / total_bikes * 100)|round|int if total_bikes > 0 else 0 }}% Fleet Availability
+                </small>
+            </div>
+        </div>
+
+        <!-- Total Bookings Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted fw-semibold small text-uppercase">Total Bookings</span>
+                    <div class="metric-icon-box bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-calendar2-range"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">{{ total_bookings }}</h2>
+                <div class="d-flex gap-2 small text-muted">
+                    <span class="text-success">{{ confirmed_bookings }} confirmed</span> • 
+                    <span class="text-info">{{ completed_bookings }} completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Metric -->
+        <div class="col-xl-3 col-md-6">
+            <div class="metric-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted fw-semibold small text-uppercase">Registered Riders</span>
+                    <div class="metric-icon-box bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <h2 class="fw-bold text-dark mb-1">{{ total_customers }}</h2>
+                <small class="text-muted">
+                    <i class="bi bi-person-check me-1"></i> Active customer accounts
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="fw-bold mb-0">Recent Reservations</h5>
+            <a href="{{ url_for('admin.bookings_list') }}" class="btn btn-sm btn-outline-primary btn-rounded">
+                View All ({{ total_bookings }}) <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table custom-table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Customer</th>
+                        <th>Bike</th>
+                        <th>Rental Window</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td class="ps-4 font-monospace fw-semibold text-secondary">
+                            #BK-{{ "%04d"|format(booking.id) }}
+                        </td>
+                        <td>
+                            <strong class="text-dark d-block">{{ booking.user.name }}</strong>
+                            <small class="text-muted">{{ booking.user.email }}</small>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">{{ booking.bike.name }}</span>
+                            <small class="text-muted d-block">{{ booking.bike.category }}</small>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div>{{ booking.start_time.strftime('%b %d, %I:%M %p') }}</div>
+                                <div class="text-muted">to {{ booking.end_time.strftime('%b %d, %I:%M %p') }}</div>
+                            </div>
+                        </td>
+                        <td class="fw-bold text-success">
+                            ${{ "%.2f"|format(booking.total_amount) }}
+                        </td>
+                        <td>
+                            <span class="badge badge-status-{{ booking.status }} px-3 py-2">
+                                {{ booking.status|capitalize }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('bookings.confirmation', booking_id=booking.id) }}" class="btn btn-sm btn-outline-secondary btn-rounded" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No reservations recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

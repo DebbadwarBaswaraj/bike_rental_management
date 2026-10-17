@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}About & Engineering Architecture{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold mb-2">
+                    System Architecture & Design Decisions
+                </span>
+                <h1 class="fw-bold">Engineering Overview: Bike Rental Management System</h1>
+                <p class="lead text-muted">
+                    A robust, production-grade full-stack web application built from scratch to demonstrate solid software engineering practices, security hygiene, and clean domain modeling.
+                </p>
+            </div>
+
+            <!-- Tech Stack Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-3 col-6">
+                    <div class="card p-3 border-0 shadow-sm rounded-4 h-100 bg-white">
+                        <div class="text-primary fs-2 mb-2"><i class="bi bi-filetype-py"></i></div>
+                        <h6 class="fw-bold mb-1">Python 3.11 + Flask</h6>
+                        <small class="text-muted">Modular architecture using Blueprints, application factory pattern, and clean routing.</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card p-3 border-0 shadow-sm rounded-4 h-100 bg-white">
+                        <div class="text-success fs-2 mb-2"><i class="bi bi-database"></i></div>
+                        <h6 class="fw-bold mb-1">SQLite & SQLAlchemy</h6>
+                        <small class="text-muted">Relational data modeling, foreign key constraints, indexes, and parameterized query execution.</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card p-3 border-0 shadow-sm rounded-4 h-100 bg-white">
+                        <div class="text-danger fs-2 mb-2"><i class="bi bi-shield-lock"></i></div>
+                        <h6 class="fw-bold mb-1">Security & Auth</h6>
+                        <small class="text-muted">Flask-Login session management, Werkzeug password hashing, Flask-WTF CSRF protection, and IDOR guards.</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card p-3 border-0 shadow-sm rounded-4 h-100 bg-white">
+                        <div class="text-info fs-2 mb-2"><i class="bi bi-bootstrap"></i></div>
+                        <h6 class="fw-bold mb-1">Bootstrap 5.3 + JS</h6>
+                        <small class="text-muted">Responsive mobile-first layout, real-time quote calculation, and graceful image error fallback.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Architectural Highlights -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+                <h3 class="fw-bold mb-4"><i class="bi bi-cpu text-primary me-2"></i>Core Architectural Highlights</h3>
+                
+                <div class="accordion accordion-flush" id="architectureAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                1. Overlapping Booking & Anti-Collision Algorithm
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#architectureAccordion">
+                            <div class="accordion-body text-secondary">
+                                Preventing double bookings is a classic distributed systems problem. Two reservations $[A_{start}, A_{end}]$ and $[B_{start}, B_{end}]$ for the same bike conflict if and only if:
+                                <code class="d-block my-2 p-2 bg-light rounded text-dark">
+                                    existing.start_time &lt; requested.end_time AND existing.end_time &gt; requested.start_time
+                                </code>
+                                In <code>booking_service.py</code>, we validate availability inside an atomic database transaction before persisting the record, ensuring strict consistency.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                2. Defensive Deletion & Financial History Preservation
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#architectureAccordion">
+                            <div class="accordion-body text-secondary">
+                                Hard-deleting records in production breaks historical booking tables, foreign key integrity, and revenue auditing. Our system implements <strong>soft-deletion</strong> via an <code>is_active</code> boolean flag. If a bike has historical bookings, deleting it in the admin console marks it inactive rather than destroying historical invoices.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                3. Insecure Direct Object Reference (IDOR) & Role Authorization
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#architectureAccordion">
+                            <div class="accordion-body text-secondary">
+                                Customers are strictly prevented from viewing or cancelling bookings belonging to other users. Every reservation query and state-changing action checks:
+                                <code class="d-block my-2 p-2 bg-light rounded text-dark">
+                                    if booking.user_id != current_user.id and not current_user.is_admin: abort(403)
+                                </code>
+                                Administrative routes are locked down using a custom Python decorator <code>@admin_required</code>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                4. CSRF Protection & Injection Defense
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#architectureAccordion">
+                            <div class="accordion-body text-secondary">
+                                All state-modifying POST requests (logins, registrations, reservations, cancellations, and bike updates) carry a cryptographic synchronizer token verified by Flask-WTF CSRFProtect. Database queries are exclusively executed through SQLAlchemy's parameterized queries, neutralizing SQL Injection.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testing and Verification Callout -->
+            <div class="p-4 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-25 d-flex align-items-center gap-3">
+                <i class="bi bi-patch-check-fill text-primary fs-1"></i>
+                <div>
+                    <h5 class="fw-bold mb-1">100% Automated Pytest Coverage</h5>
+                    <p class="text-secondary small mb-0">
+                        Includes comprehensive test suites covering user authentication, duplicate email detection, valid & invalid booking durations, race condition / overlap prevention, IDOR protection, and admin dashboard metrics.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

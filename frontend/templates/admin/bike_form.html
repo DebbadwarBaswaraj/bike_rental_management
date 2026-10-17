@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-muted">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.bikes_list') }}" class="text-decoration-none text-muted">Fleet Management</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ action }} Bike</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1">{{ title }}</h2>
+                        <p class="text-muted small mb-0">Fill in the technical specifications, category, and hourly rental pricing</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+                        Admin Fleet Action
+                    </span>
+                </div>
+
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <div class="row g-3">
+                        <!-- Bike Name -->
+                        <div class="col-md-6">
+                            <label for="name" class="form-label fw-semibold small">Bike Name</label>
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Trek Marlin 8 Gen 3", id="name", required=True) }}
+                            {% for error in form.name.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bike Model -->
+                        <div class="col-md-6">
+                            <label for="model" class="form-label fw-semibold small">Model / Brand Edition</label>
+                            {{ form.model(class="form-control" + (" is-invalid" if form.model.errors else ""), placeholder="e.g. Marlin 8 2024 Edition", id="model", required=True) }}
+                            {% for error in form.model.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-md-6">
+                            <label for="category" class="form-label fw-semibold small">Category</label>
+                            {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else ""), id="category", required=True) }}
+                            {% for error in form.category.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Price per Hour -->
+                        <div class="col-md-6">
+                            <label for="price_per_hour" class="form-label fw-semibold small">Price per Hour ($ USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">$</span>
+                                {{ form.price_per_hour(class="form-control" + (" is-invalid" if form.price_per_hour.errors else ""), placeholder="8.50", id="price_per_hour", step="0.50", required=True) }}
+                            </div>
+                            {% for error in form.price_per_hour.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Image URL -->
+                        <div class="col-12">
+                            <label for="image_url" class="form-label fw-semibold small">Image URL (Optional)</label>
+                            {{ form.image_url(class="form-control" + (" is-invalid" if form.image_url.errors else ""), placeholder="https://images.unsplash.com/...", id="image_url") }}
+                            <small class="text-muted">Enter a direct high-resolution image link. If left blank, a high-quality SVG vector placeholder is used automatically.</small>
+                            {% for error in form.image_url.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-semibold small">Description & Specifications</label>
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4, placeholder="Details on frame, gearing, brake system, terrain suitability...", id="description") }}
+                            {% for error in form.description.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Active Checkbox -->
+                        <div class="col-12">
+                            <div class="form-check form-switch p-3 bg-light rounded-3">
+                                {{ form.is_active(class="form-check-input ms-0 me-3", id="is_active") }}
+                                <label class="form-check-label fw-semibold" for="is_active">
+                                    Available for Customer Booking
+                                </label>
+                                <small class="text-muted d-block ms-5">Toggle off if the bike is undergoing mechanical servicing or seasonal storage.</small>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12 d-flex gap-3 justify-content-end mt-4">
+                            <a href="{{ url_for('admin.bikes_list') }}" class="btn btn-outline-secondary btn-rounded px-4">
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn btn-primary btn-rounded px-5 fw-semibold") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

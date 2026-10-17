@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}My Rental Bookings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">My Bookings</h1>
+            <p class="text-muted mb-0">View your active reservations, past rentals, and booking receipts.</p>
+        </div>
+        <a href="{{ url_for('bikes.bike_list') }}" class="btn btn-primary btn-rounded px-4">
+            <i class="bi bi-plus-lg me-1"></i> Rent a Bike
+        </a>
+    </div>
+
+    {% if bookings %}
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+                <table class="table custom-table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Booking Ref</th>
+                            <th>Bike</th>
+                            <th>Rental Window</th>
+                            <th>Duration</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td class="ps-4 font-monospace fw-semibold text-secondary">
+                                #BK-{{ "%04d"|format(booking.id) }}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ booking.bike.image_url or url_for('static', filename='images/placeholder.svg') }}" 
+                                         alt="{{ booking.bike.name }}" 
+                                         class="rounded-3" 
+                                         style="width: 48px; height: 48px; object-fit: cover;"
+                                         onerror="this.src='/static/images/placeholder.svg';">
+                                    <div>
+                                        <a href="{{ url_for('bikes.bike_detail', bike_id=booking.bike.id) }}" class="fw-bold text-dark text-decoration-none">
+                                            {{ booking.bike.name }}
+                                        </a>
+                                        <div class="text-muted small">{{ booking.bike.category }} • {{ booking.bike.model }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <div><i class="bi bi-box-arrow-right text-success me-1"></i> {{ booking.start_time.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                                    <div class="text-muted"><i class="bi bi-box-arrow-in-left text-danger me-1"></i> {{ booking.end_time.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1">
+                                    {{ booking.duration_hours }} hrs
+                                </span>
+                            </td>
+                            <td class="fw-bold text-success fs-6">
+                                ${{ "%.2f"|format(booking.total_amount) }}
+                            </td>
+                            <td>
+                                <span class="badge badge-status-{{ booking.status }} px-3 py-2">
+                                    {{ booking.status|capitalize }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ url_for('bookings.confirmation', booking_id=booking.id) }}" class="btn btn-sm btn-outline-secondary btn-rounded" title="View Receipt">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+
+                                    {% if booking.can_be_cancelled %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-rounded" data-bs-toggle="modal" data-bs-target="#cancelModal{{ booking.id }}">
+                                            Cancel
+                                        </button>
+
+                                        <!-- Cancel Confirmation Modal -->
+                                        <div class="modal fade" id="cancelModal{{ booking.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ booking.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content rounded-4 border-0 shadow">
+                                                    <div class="modal-header border-0 pb-0">
+                                                        <h5 class="modal-title fw-bold text-danger" id="cancelModalLabel{{ booking.id }}">
+                                                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Cancel Reservation?
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body text-start py-4">
+                                                        <p class="mb-2">Are you sure you want to cancel booking <strong>#BK-{{ "%04d"|format(booking.id) }}</strong> for <strong>{{ booking.bike.name }}</strong>?</p>
+                                                        <p class="text-muted small mb-0">The reserved time slot will immediately be made available for other riders.</p>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pt-0">
+                                                        <button type="button" class="btn btn-light btn-rounded" data-bs-dismiss="modal">Keep Reservation</button>
+                                                        <form method="POST" action="{{ url_for('bookings.cancel', booking_id=booking.id) }}" class="d-inline">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-danger btn-rounded px-3">
+                                                                Yes, Cancel Booking
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
+            <div class="py-5">
+                <i class="bi bi-calendar-x text-muted mb-3" style="font-size: 3.5rem;"></i>
+                <h4 class="fw-bold">No Bookings Found</h4>
+                <p class="text-muted mb-4">You haven't booked any bikes yet. Find a ride from our premium fleet today!</p>
+                <a href="{{ url_for('bikes.bike_list') }}" class="btn btn-primary btn-rounded px-4 py-2">
+                    Browse All Bikes
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

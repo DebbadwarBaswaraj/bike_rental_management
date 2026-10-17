@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bike.name }} - Details & Booking{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('bikes.bike_list') }}" class="text-decoration-none text-muted">Bikes</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ bike.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Left Column: Bike Details & Specs -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
+                <div class="position-relative" style="height: 380px; background-color: #f1f5f9;">
+                    <span class="category-badge-floating badge badge-category-{{ bike.category|lower }} fs-6">
+                        {{ bike.category }} Bike
+                    </span>
+                    <img src="{{ bike.image_url or url_for('static', filename='images/placeholder.svg') }}" 
+                         alt="{{ bike.name }}" 
+                         class="w-100 h-100" 
+                         style="object-fit: cover;"
+                         onerror="this.src='/static/images/placeholder.svg';">
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="fw-bold mb-1">{{ bike.name }}</h2>
+                            <span class="text-muted"><i class="bi bi-tag-fill text-primary me-1"></i> Model: {{ bike.model }}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="fs-2 fw-bold text-primary">${{ "%.2f"|format(bike.price_per_hour) }}</span>
+                            <span class="text-muted d-block small">per hour</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 my-3">
+                        {% if not bike.is_active %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                                <i class="bi bi-exclamation-octagon me-1"></i> Under Maintenance
+                            </span>
+                        {% elif is_rented_now %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
+                                <i class="bi bi-clock-history me-1"></i> Currently on a Ride (Book ahead for future hours)
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i> Available Now
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold mb-3">Description</h5>
+                    <p class="text-secondary leading-relaxed mb-4">
+                        {{ bike.description or "High-quality, meticulously serviced bicycle engineered for reliability and high performance across local trails and city streets." }}
+                    </p>
+
+                    <h5 class="fw-bold mb-3">Included with Every Rental</h5>
+                    <div class="row g-3 text-secondary small">
+                        <div class="col-sm-6 d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-check text-success fs-5"></i>
+                            <span>Sanitized Safety Helmet</span>
+                        </div>
+                        <div class="col-sm-6 d-flex align-items-center gap-2">
+                            <i class="bi bi-lock text-success fs-5"></i>
+                            <span>Heavy-Duty Steel Cable Lock</span>
+                        </div>
+                        <div class="col-sm-6 d-flex align-items-center gap-2">
+                            <i class="bi bi-lightbulb text-success fs-5"></i>
+                            <span>LED Front & Rear Safety Lights</span>
+                        </div>
+                        <div class="col-sm-6 d-flex align-items-center gap-2">
+                            <i class="bi bi-telephone-inbound text-success fs-5"></i>
+                            <span>Complimentary Emergency Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Booking Card -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white sticky-top" style="top: 100px;">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h4 class="fw-bold mb-0">Reserve This Bike</h4>
+                    <span class="badge bg-light text-dark border px-2 py-1">Instant Hold</span>
+                </div>
+
+                {% if bike.is_active %}
+                    <form method="POST" action="{{ url_for('bookings.create', bike_id=bike.id) }}" id="bike-booking-form">
+                        {{ booking_form.hidden_tag() }}
+                        <!-- Hidden input for JS price calculation -->
+                        <input type="hidden" id="bike_id" value="{{ bike.id }}" data-hourly-price="{{ bike.price_per_hour }}">
+
+                        <!-- Start Time -->
+                        <div class="mb-3">
+                            <label for="start_time" class="form-label fw-semibold small">
+                                <i class="bi bi-calendar-event me-1 text-primary"></i> Pickup Date & Time
+                            </label>
+                            {{ booking_form.start_time(class="form-control form-control-lg fs-6", id="start_time", required=True) }}
+                            <small class="text-muted">Select when you want to start riding</small>
+                        </div>
+
+                        <!-- End Time -->
+                        <div class="mb-4">
+                            <label for="end_time" class="form-label fw-semibold small">
+                                <i class="bi bi-calendar2-check me-1 text-primary"></i> Return Date & Time
+                            </label>
+                            {{ booking_form.end_time(class="form-control form-control-lg fs-6", id="end_time", required=True) }}
+                            <small class="text-muted">Select when you will return the bike</small>
+                        </div>
+
+                        <!-- Live Quote Box -->
+                        <div id="booking-quote-preview" class="quote-box mb-4 d-none">
+                            <div class="d-flex justify-content-between mb-1 small text-secondary">
+                                <span>Estimated Duration:</span>
+                                <strong id="quote-duration" class="text-dark">--</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1 small text-secondary">
+                                <span>Hourly Rate:</span>
+                                <span>${{ "%.2f"|format(bike.price_per_hour) }} / hr</span>
+                            </div>
+                            <hr class="my-2 border-success border-opacity-25">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark">Estimated Total:</span>
+                                <span class="fs-4 fw-bold text-success" id="quote-total">--</span>
+                            </div>
+                            <div id="quote-error" class="text-danger small mt-2 d-none"></div>
+                        </div>
+
+                        {% if current_user.is_authenticated %}
+                            {{ booking_form.submit(class="btn btn-primary btn-lg w-100 btn-rounded fw-semibold py-3 shadow-sm", id="btn-confirm-booking") }}
+                        {% else %}
+                            <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary btn-lg w-100 btn-rounded fw-semibold py-3 shadow-sm">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Reserve
+                            </a>
+                            <p class="text-center text-muted small mt-2 mb-0">
+                                Need an account? <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none">Register here</a>
+                            </p>
+                        {% endif %}
+                    </form>
+
+                    <!-- Policy note -->
+                    <div class="mt-4 pt-3 border-top text-muted small">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-shield-check text-success"></i>
+                            <span><strong>Free Cancellation:</strong> Cancel anytime prior to pickup.</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-lightning-charge text-primary"></i>
+                            <span><strong>Anti-Collision:</strong> Double bookings are strictly prevented.</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning mb-0 rounded-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        This bike is currently deactivated or undergoing routine safety inspection. Please select another bike from our fleet.
+                    </div>
+                    <a href="{{ url_for('bikes.bike_list') }}" class="btn btn-outline-secondary w-100 btn-rounded mt-3">
+                        Browse Other Bikes
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

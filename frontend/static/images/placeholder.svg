@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <!-- Bike Wheels -->
+  <circle cx="280" cy="320" r="75" fill="none" stroke="#334155" stroke-width="10"/>
+  <circle cx="280" cy="320" r="14" fill="#10b981"/>
+  <circle cx="520" cy="320" r="75" fill="none" stroke="#334155" stroke-width="10"/>
+  <circle cx="520" cy="320" r="14" fill="#06b6d4"/>
+  <!-- Bike Frame -->
+  <polyline points="280,320 380,320 450,220 280,320" fill="none" stroke="url(#accent)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="380,320 360,190" fill="none" stroke="url(#accent)" stroke-width="9" stroke-linecap="round"/>
+  <!-- Saddle -->
+  <line x1="335" y1="190" x2="385" y2="190" stroke="#f8fafc" stroke-width="10" stroke-linecap="round"/>
+  <!-- Front fork and handlebars -->
+  <polyline points="520,320 460,175 440,175" fill="none" stroke="url(#accent)" stroke-width="9" stroke-linecap="round"/>
+  <polyline points="430,175 470,165" stroke="#f8fafc" stroke-width="10" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="400" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#94a3b8" text-anchor="middle">PedalPulse Bike Fleet</text>
+</svg>

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Rent High-Performance Bikes Locally{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-lg-start mb-5 rounded-4 shadow mx-2 mx-md-4">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <span class="hero-badge">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> Eco-Friendly Urban Mobility & Trail Adventure
+                </span>
+                <h1 class="display-4 fw-bold mb-3 lh-sm">
+                    Find Your Perfect Ride, <br class="d-none d-md-inline"> Book by the Hour, Ride Anywhere.
+                </h1>
+                <p class="lead text-light text-opacity-75 mb-4 pe-lg-4">
+                    PedalPulse offers instant, transparent hourly rentals on top-tier mountain bikes, high-speed road machines, smooth e-bikes, and comfortable city cruisers.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a href="{{ url_for('bikes.bike_list') }}" class="btn btn-accent btn-rounded px-4 py-3 fw-semibold">
+                        <i class="bi bi-bicycle me-2"></i> Browse All Bikes
+                    </a>
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-rounded px-4 py-3 fw-semibold">
+                            <i class="bi bi-person-plus me-2"></i> Create Free Account
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-outline-light btn-rounded px-4 py-3 fw-semibold">
+                            <i class="bi bi-journal-check me-2"></i> View My Bookings
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-5 text-center mt-5 mt-lg-0">
+                <div class="position-relative d-inline-block">
+                    <img src="https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?auto=format&fit=crop&w=700&q=80" 
+                         alt="Featured Mountain Bike" 
+                         class="img-fluid rounded-4 shadow-lg border border-secondary border-opacity-25"
+                         style="max-height: 380px; object-fit: cover;">
+                    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-n3 bg-white text-dark p-3 rounded-4 shadow-lg border d-flex align-items-center gap-3" style="min-width: 260px;">
+                        <div class="bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                            <i class="bi bi-shield-check fs-4"></i>
+                        </div>
+                        <div class="text-start">
+                            <h6 class="mb-0 fw-bold">100% Inspected</h6>
+                            <small class="text-muted">Serviced before every ride</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Service Highlights Banner -->
+<div class="container mb-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-3 col-6">
+            <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
+                <i class="bi bi-clock-history fs-1 text-primary mb-2"></i>
+                <h6 class="fw-bold mb-1">Instant Booking</h6>
+                <small class="text-muted">Reserve in seconds with live availability confirmation.</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
+                <i class="bi bi-currency-dollar fs-1 text-success mb-2"></i>
+                <h6 class="fw-bold mb-1">Honest Hourly Rates</h6>
+                <small class="text-muted">No hidden fees or unexpected security deposits.</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
+                <i class="bi bi-x-circle fs-1 text-info mb-2"></i>
+                <h6 class="fw-bold mb-1">Flexible Cancellation</h6>
+                <small class="text-muted">Free cancellation before your scheduled reservation begins.</small>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
+                <i class="bi bi-tools fs-1 text-warning mb-2"></i>
+                <h6 class="fw-bold mb-1">Pro Tuning & Locks</h6>
+                <small class="text-muted">Every rental includes high-grade lock and certified helmet.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Explore by Category -->
+<section class="container mb-5">
+    <div class="text-center mb-4">
+        <span class="text-primary fw-bold text-uppercase small tracking-wide">Category Lineup</span>
+        <h2 class="fw-bold">Explore Our Fleet by Category</h2>
+        <p class="text-muted">Whatever your journey, we have a precision-tuned bicycle matched to your style.</p>
+    </div>
+
+    <div class="row g-3">
+        {% for cat in categories %}
+        <div class="col-md-4 col-sm-6">
+            <a href="{{ url_for('bikes.bike_list', category=cat.name) }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-lift" style="transition: all 0.2s;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 rounded-4 bg-light text-primary">
+                            <i class="bi {{ cat.icon }} fs-2"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">{{ cat.name }}</h5>
+                            <p class="text-muted small mb-0">{{ cat.desc }}</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Featured Bikes Section -->
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-success fw-bold text-uppercase small">Top Picks</span>
+            <h2 class="fw-bold mb-0">Featured Bicycles</h2>
+        </div>
+        <a href="{{ url_for('bikes.bike_list') }}" class="btn btn-outline-primary btn-rounded">
+            View All Bikes <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for bike in featured_bikes %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card bike-card h-100 shadow-sm">
+                <div class="bike-image-wrapper">
+                    <span class="category-badge-floating badge badge-category-{{ bike.category|lower }}">
+                        {{ bike.category }}
+                    </span>
+                    <img src="{{ bike.image_url or url_for('static', filename='images/placeholder.svg') }}" 
+                         alt="{{ bike.name }}" 
+                         class="bike-img"
+                         onerror="this.src='/static/images/placeholder.svg';">
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="card-title fw-bold mb-1">{{ bike.name }}</h5>
+                            <small class="text-muted"><i class="bi bi-tag me-1"></i>{{ bike.model }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="price-tag">${{ "%.2f"|format(bike.price_per_hour) }}</div>
+                            <span class="price-period">per hour</span>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small mb-4 flex-grow-1">
+                        {{ (bike.description or '')[:110] }}{% if bike.description and bike.description|length > 110 %}...{% endif %}
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <i class="bi bi-check-circle me-1"></i> Active Fleet
+                        </span>
+                        <a href="{{ url_for('bikes.bike_detail', bike_id=bike.id) }}" class="btn btn-primary btn-rounded px-3 py-2">
+                            View & Book <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- How It Works 3-Step Guide -->
+<section class="bg-light py-5 rounded-4 mx-2 mx-md-4 mb-5 border">
+    <div class="container text-center">
+        <span class="text-primary fw-bold text-uppercase small">Simple & Seamless</span>
+        <h2 class="fw-bold mb-4">How PedalPulse Works</h2>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="p-3">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3 text-primary border" style="width: 70px; height: 70px;">
+                        <span class="fs-3 fw-bold">1</span>
+                    </div>
+                    <h5 class="fw-bold">Pick Your Bike</h5>
+                    <p class="text-muted small">Browse our catalogue of mountain, road, and e-bikes with detailed specs and photos.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3 text-primary border" style="width: 70px; height: 70px;">
+                        <span class="fs-3 fw-bold">2</span>
+                    </div>
+                    <h5 class="fw-bold">Select Date & Time</h5>
+                    <p class="text-muted small">Choose your start and end reservation times. Get instant price transparency and no conflicts.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3 text-primary border" style="width: 70px; height: 70px;">
+                        <span class="fs-3 fw-bold">3</span>
+                    </div>
+                    <h5 class="fw-bold">Ride & Enjoy</h5>
+                    <p class="text-muted small">Unlock your bike with your digital confirmation and hit the road with full confidence.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
