@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚲 PedalPulse — Bike Rental Management System
 
 A full-stack, responsive, and secure web application designed for renting bikes with transparent hourly rates, conflict-free booking scheduling, and a comprehensive administrative management portal. Built from scratch with **Python Flask**, **SQLAlchemy ORM**, **SQLite**, **Bootstrap 5.3**, and **Vanilla JavaScript**.
@@ -338,3 +339,6 @@ Pre-configured in the seeded database for easy evaluation:
 2. **GPS & Telemetry Tracking**: Future enhancement: IoT integration to display real-time bike GPS coordinates and battery charge levels for e-bikes.
 3. **Automated Late Return Penalties**: Future enhancement: Background cron task checking for overdue returns and applying automated hourly late fees.
 4. **Email & SMS Notifications**: Future enhancement: Celery background worker with Twilio/SendGrid to send booking reminder emails and pickup codes.
+=======
+# bike_rental_management
+>>>>>>> b4dbc8b190ffbe69a8cfe49ec58a57028a099e7a
